@@ -1,7 +1,6 @@
 {
-  "name": "playground-ts",
+  "name": "@lsby/ts-log",
   "version": "0.0.0",
-  "private": true,
   "type": "module",
   "exports": {
     "require": "./dist/cjs/index.cjs",
@@ -28,12 +27,14 @@
     "test:coverage": "npm run check:all && vitest run --coverage && open-cli ./coverage/index.html"
   },
   "dependencies": {
+    "debug": "^4.3.5",
     "vitest": "^2.0.2",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "^4.2.1",
     "@lsby/eslint-config": "^0.0.2",
+    "@types/debug": "^4.1.12",
     "@types/node": "^20.12.10",
     "@vitest/coverage-v8": "^2.0.2",
     "bumpp": "^9.4.1",
