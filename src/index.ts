@@ -1,4 +1,4 @@
-import { debug } from 'debug'
+import debug from 'debug'
 
 /**
  * Log 类用于在不同日志级别输出日志消息。
