@@ -45,12 +45,18 @@ export class Log {
   async trace(formatter: unknown, ...args: unknown[]): Promise<void> {
     this._trace(formatter, ...args)
   }
+  traceSync(formatter: unknown, ...args: unknown[]): void {
+    this._trace(formatter, ...args)
+  }
 
   /**
    * 记录 debug 级别的日志消息。
    * 用于开发过程中记录详细的调试信息。
    */
   async debug(formatter: unknown, ...args: unknown[]): Promise<void> {
+    this._debug(formatter, ...args)
+  }
+  debugSync(formatter: unknown, ...args: unknown[]): void {
     this._debug(formatter, ...args)
   }
 
@@ -61,6 +67,9 @@ export class Log {
   async info(formatter: unknown, ...args: unknown[]): Promise<void> {
     this._info(formatter, ...args)
   }
+  infoSync(formatter: unknown, ...args: unknown[]): void {
+    this._info(formatter, ...args)
+  }
 
   /**
    * 记录 warn 级别的日志消息。
@@ -69,12 +78,18 @@ export class Log {
   async warn(formatter: unknown, ...args: unknown[]): Promise<void> {
     this._warn(formatter, ...args)
   }
+  warnSync(formatter: unknown, ...args: unknown[]): void {
+    this._warn(formatter, ...args)
+  }
 
   /**
    * 记录 error 级别的日志消息。
    * 用于记录需要立即关注的错误或异常。
    */
   async error(formatter: unknown, ...args: unknown[]): Promise<void> {
+    this._error(formatter, ...args)
+  }
+  errorSync(formatter: unknown, ...args: unknown[]): void {
     this._error(formatter, ...args)
   }
 
