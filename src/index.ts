@@ -42,10 +42,7 @@ export class Log {
    * 记录 trace 级别的日志消息。
    * 用于记录详细的跟踪信息，如函数调用或特定的业务逻辑步骤。
    */
-  async trace(formatter: unknown, ...args: unknown[]): Promise<void> {
-    this._trace(formatter, ...args)
-  }
-  traceSync(formatter: unknown, ...args: unknown[]): void {
+  trace(formatter: unknown, ...args: unknown[]): void {
     this._trace(formatter, ...args)
   }
 
@@ -53,10 +50,7 @@ export class Log {
    * 记录 debug 级别的日志消息。
    * 用于开发过程中记录详细的调试信息。
    */
-  async debug(formatter: unknown, ...args: unknown[]): Promise<void> {
-    this._debug(formatter, ...args)
-  }
-  debugSync(formatter: unknown, ...args: unknown[]): void {
+  debug(formatter: unknown, ...args: unknown[]): void {
     this._debug(formatter, ...args)
   }
 
@@ -64,10 +58,7 @@ export class Log {
    * 记录 info 级别的日志消息。
    * 用于记录应用程序的一般信息。
    */
-  async info(formatter: unknown, ...args: unknown[]): Promise<void> {
-    this._info(formatter, ...args)
-  }
-  infoSync(formatter: unknown, ...args: unknown[]): void {
+  info(formatter: unknown, ...args: unknown[]): void {
     this._info(formatter, ...args)
   }
 
@@ -75,10 +66,7 @@ export class Log {
    * 记录 warn 级别的日志消息。
    * 用于记录潜在问题或警告，这些问题不会立即影响应用程序运行，但需要注意。
    */
-  async warn(formatter: unknown, ...args: unknown[]): Promise<void> {
-    this._warn(formatter, ...args)
-  }
-  warnSync(formatter: unknown, ...args: unknown[]): void {
+  warn(formatter: unknown, ...args: unknown[]): void {
     this._warn(formatter, ...args)
   }
 
@@ -86,10 +74,7 @@ export class Log {
    * 记录 error 级别的日志消息。
    * 用于记录需要立即关注的错误或异常。
    */
-  async error(formatter: unknown, ...args: unknown[]): Promise<void> {
-    this._error(formatter, ...args)
-  }
-  errorSync(formatter: unknown, ...args: unknown[]): void {
+  error(formatter: unknown, ...args: unknown[]): void {
     this._error(formatter, ...args)
   }
 
@@ -97,26 +82,22 @@ export class Log {
    * 根据指定的日志级别记录日志消息。
    * 这个方法允许你动态选择要使用的日志级别（`trace` < `debug` < `info` < `warn` < `error`）。
    */
-  async log(
-    level: 'trace' | 'debug' | 'info' | 'warn' | 'error',
-    formatter: unknown,
-    ...args: unknown[]
-  ): Promise<void> {
+  log(level: 'trace' | 'debug' | 'info' | 'warn' | 'error', formatter: unknown, ...args: unknown[]): void {
     switch (level) {
       case 'trace':
-        await this.trace(formatter, ...args)
+        this.trace(formatter, ...args)
         break
       case 'debug':
-        await this.debug(formatter, ...args)
+        this.debug(formatter, ...args)
         break
       case 'info':
-        await this.info(formatter, ...args)
+        this.info(formatter, ...args)
         break
       case 'warn':
-        await this.warn(formatter, ...args)
+        this.warn(formatter, ...args)
         break
       case 'error':
-        await this.error(formatter, ...args)
+        this.error(formatter, ...args)
         break
     }
   }
