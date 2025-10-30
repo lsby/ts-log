@@ -1,3 +1,4 @@
+import { format } from 'util'
 import debug from 'debug'
 
 /**
@@ -6,6 +7,11 @@ import debug from 'debug'
  */
 export class Log {
   private debugObj: debug.Debugger
+  private redirectCallback?: (
+    level: 'trace' | 'debug' | 'info' | 'warn' | 'error',
+    content: string,
+    namespace: string,
+  ) => void
   private _info: debug.Debugger
   private _debug: debug.Debugger
   private _error: debug.Debugger
@@ -17,10 +23,10 @@ export class Log {
    * 初始化日志对象，包含不同的日志级别：info、debug、error、warn、trace。
    *
    * 顺序: **`trace` < `debug` < `info` < `warn` < `error`**
-   * @param {string} name - 日志命名空间的名称（用于日志前缀）。
+   * @param {string} namespace - 日志命名空间的名称（用于日志前缀）。
    */
-  constructor(private name: string) {
-    this.debugObj = debug(this.name)
+  constructor(private namespace: string) {
+    this.debugObj = debug(this.namespace)
     this._trace = this.debugObj.extend('trace')
     this._debug = this.debugObj.extend('debug')
     this._info = this.debugObj.extend('info')
@@ -35,7 +41,17 @@ export class Log {
    * @returns {Log} 返回一个具有扩展命名空间的新 Log 实例。
    */
   extend(name: string): Log {
-    return new Log(`${this.name}:${name}`)
+    return new Log(`${this.namespace}:${name}`)
+  }
+
+  /**
+   * 重定向日志输出到自定义函数。
+   * @param callback - 回调函数，接收日志级别、内容和命名空间。
+   */
+  redirect(
+    callback: (level: 'trace' | 'debug' | 'info' | 'warn' | 'error', namespace: string, content: string) => void,
+  ): void {
+    this.redirectCallback = callback
   }
 
   /**
@@ -43,6 +59,11 @@ export class Log {
    * 用于记录详细的跟踪信息，如函数调用或特定的业务逻辑步骤。
    */
   trace(formatter: unknown, ...args: unknown[]): void {
+    if (this.redirectCallback) {
+      const content = format(formatter, ...args)
+      this.redirectCallback('trace', this.namespace, content)
+      return
+    }
     this._trace(formatter, ...args)
   }
 
@@ -51,6 +72,11 @@ export class Log {
    * 用于开发过程中记录详细的调试信息。
    */
   debug(formatter: unknown, ...args: unknown[]): void {
+    if (this.redirectCallback) {
+      const content = format(formatter, ...args)
+      this.redirectCallback('debug', this.namespace, content)
+      return
+    }
     this._debug(formatter, ...args)
   }
 
@@ -59,6 +85,11 @@ export class Log {
    * 用于记录应用程序的一般信息。
    */
   info(formatter: unknown, ...args: unknown[]): void {
+    if (this.redirectCallback) {
+      const content = format(formatter, ...args)
+      this.redirectCallback('info', this.namespace, content)
+      return
+    }
     this._info(formatter, ...args)
   }
 
@@ -67,6 +98,11 @@ export class Log {
    * 用于记录潜在问题或警告，这些问题不会立即影响应用程序运行，但需要注意。
    */
   warn(formatter: unknown, ...args: unknown[]): void {
+    if (this.redirectCallback) {
+      const content = format(formatter, ...args)
+      this.redirectCallback('warn', this.namespace, content)
+      return
+    }
     this._warn(formatter, ...args)
   }
 
@@ -75,6 +111,11 @@ export class Log {
    * 用于记录需要立即关注的错误或异常。
    */
   error(formatter: unknown, ...args: unknown[]): void {
+    if (this.redirectCallback) {
+      const content = format(formatter, ...args)
+      this.redirectCallback('error', this.namespace, content)
+      return
+    }
     this._error(formatter, ...args)
   }
 
@@ -83,6 +124,11 @@ export class Log {
    * 这个方法允许你动态选择要使用的日志级别（`trace` < `debug` < `info` < `warn` < `error`）。
    */
   log(level: 'trace' | 'debug' | 'info' | 'warn' | 'error', formatter: unknown, ...args: unknown[]): void {
+    if (this.redirectCallback) {
+      const content = format(formatter, ...args)
+      this.redirectCallback(level, this.namespace, content)
+      return
+    }
     switch (level) {
       case 'trace':
         this.trace(formatter, ...args)
