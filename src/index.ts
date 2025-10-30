@@ -65,8 +65,9 @@ export class Log {
    */
   pipe(
     callback: (level: 'trace' | 'debug' | 'info' | 'warn' | 'error', namespace: string, content: string) => void,
-  ): void {
+  ): this {
     this.pipeCallback = callback
+    return this
   }
 
   /**
