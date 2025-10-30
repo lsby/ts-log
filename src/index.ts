@@ -12,6 +12,11 @@ export class Log {
     content: string,
     namespace: string,
   ) => void
+  private pipeCallback?: (
+    level: 'trace' | 'debug' | 'info' | 'warn' | 'error',
+    content: string,
+    namespace: string,
+  ) => void
   private _info: debug.Debugger
   private _debug: debug.Debugger
   private _error: debug.Debugger
@@ -55,6 +60,16 @@ export class Log {
   }
 
   /**
+   * 管道日志输出，先输出到控制台，再发送给自定义函数。
+   * @param callback - 回调函数，接收日志级别、内容和命名空间。
+   */
+  pipe(
+    callback: (level: 'trace' | 'debug' | 'info' | 'warn' | 'error', namespace: string, content: string) => void,
+  ): void {
+    this.pipeCallback = callback
+  }
+
+  /**
    * 记录 trace 级别的日志消息。
    * 用于记录详细的跟踪信息，如函数调用或特定的业务逻辑步骤。
    */
@@ -65,6 +80,10 @@ export class Log {
       return
     }
     this._trace(formatter, ...args)
+    if (this.pipeCallback) {
+      const content = format(formatter, ...args)
+      this.pipeCallback('trace', this.namespace, content)
+    }
   }
 
   /**
@@ -78,6 +97,10 @@ export class Log {
       return
     }
     this._debug(formatter, ...args)
+    if (this.pipeCallback) {
+      const content = format(formatter, ...args)
+      this.pipeCallback('debug', this.namespace, content)
+    }
   }
 
   /**
@@ -91,6 +114,10 @@ export class Log {
       return
     }
     this._info(formatter, ...args)
+    if (this.pipeCallback) {
+      const content = format(formatter, ...args)
+      this.pipeCallback('info', this.namespace, content)
+    }
   }
 
   /**
@@ -104,6 +131,10 @@ export class Log {
       return
     }
     this._warn(formatter, ...args)
+    if (this.pipeCallback) {
+      const content = format(formatter, ...args)
+      this.pipeCallback('warn', this.namespace, content)
+    }
   }
 
   /**
@@ -117,6 +148,10 @@ export class Log {
       return
     }
     this._error(formatter, ...args)
+    if (this.pipeCallback) {
+      const content = format(formatter, ...args)
+      this.pipeCallback('error', this.namespace, content)
+    }
   }
 
   /**
