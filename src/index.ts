@@ -8,10 +8,10 @@ import debug from 'debug'
 export class Log {
   private debugObj: debug.Debugger
   private redirectCallbacks: Array<
-    (level: 'trace' | 'debug' | 'info' | 'warn' | 'error', content: string, namespace: string) => void
+    (level: 'trace' | 'debug' | 'info' | 'warn' | 'error', content: string, namespace: string) => Promise<void>
   > = []
   private pipeCallbacks: Array<
-    (level: 'trace' | 'debug' | 'info' | 'warn' | 'error', content: string, namespace: string) => void
+    (level: 'trace' | 'debug' | 'info' | 'warn' | 'error', content: string, namespace: string) => Promise<void>
   > = []
   private _info: debug.Debugger
   private _debug: debug.Debugger
@@ -53,7 +53,11 @@ export class Log {
    * @param callback - 回调函数，接收日志级别、内容和命名空间。
    */
   redirect(
-    callback: (level: 'trace' | 'debug' | 'info' | 'warn' | 'error', namespace: string, content: string) => void,
+    callback: (
+      level: 'trace' | 'debug' | 'info' | 'warn' | 'error',
+      namespace: string,
+      content: string,
+    ) => Promise<void>,
   ): this {
     this.redirectCallbacks.push(callback)
     return this
@@ -64,7 +68,11 @@ export class Log {
    * @param callback - 回调函数，接收日志级别、内容和命名空间。
    */
   pipe(
-    callback: (level: 'trace' | 'debug' | 'info' | 'warn' | 'error', namespace: string, content: string) => void,
+    callback: (
+      level: 'trace' | 'debug' | 'info' | 'warn' | 'error',
+      namespace: string,
+      content: string,
+    ) => Promise<void>,
   ): this {
     this.pipeCallbacks.push(callback)
     return this
@@ -74,18 +82,28 @@ export class Log {
    * 记录 trace 级别的日志消息。
    * 用于记录详细的跟踪信息，如函数调用或特定的业务逻辑步骤。
    */
-  trace(formatter: unknown, ...args: unknown[]): void {
+  async trace(formatter: unknown, ...args: unknown[]): Promise<void> {
     if (this.redirectCallbacks.length > 0) {
       const content = format(formatter, ...args)
       for (let callback of this.redirectCallbacks) {
-        callback('trace', this.namespace, content)
+        try {
+          await callback('trace', this.namespace, content)
+        } catch (e) {
+          const errorLog = new Log(this.namespace)
+          await errorLog.error('Callback error in trace:', e)
+        }
       }
       return
     }
     this._trace(formatter, ...args)
     for (let callback of this.pipeCallbacks) {
       const content = format(formatter, ...args)
-      callback('trace', this.namespace, content)
+      try {
+        await callback('trace', this.namespace, content)
+      } catch (e) {
+        const errorLog = new Log(this.namespace)
+        await errorLog.error('Callback error in trace pipe:', e)
+      }
     }
   }
 
@@ -93,18 +111,28 @@ export class Log {
    * 记录 debug 级别的日志消息。
    * 用于开发过程中记录详细的调试信息。
    */
-  debug(formatter: unknown, ...args: unknown[]): void {
+  async debug(formatter: unknown, ...args: unknown[]): Promise<void> {
     if (this.redirectCallbacks.length > 0) {
       const content = format(formatter, ...args)
       for (let callback of this.redirectCallbacks) {
-        callback('debug', this.namespace, content)
+        try {
+          await callback('debug', this.namespace, content)
+        } catch (e) {
+          const errorLog = new Log(this.namespace)
+          await errorLog.error('Callback error in debug:', e)
+        }
       }
       return
     }
     this._debug(formatter, ...args)
     for (let callback of this.pipeCallbacks) {
       const content = format(formatter, ...args)
-      callback('debug', this.namespace, content)
+      try {
+        await callback('debug', this.namespace, content)
+      } catch (e) {
+        const errorLog = new Log(this.namespace)
+        await errorLog.error('Callback error in debug pipe:', e)
+      }
     }
   }
 
@@ -112,18 +140,28 @@ export class Log {
    * 记录 info 级别的日志消息。
    * 用于记录应用程序的一般信息。
    */
-  info(formatter: unknown, ...args: unknown[]): void {
+  async info(formatter: unknown, ...args: unknown[]): Promise<void> {
     if (this.redirectCallbacks.length > 0) {
       const content = format(formatter, ...args)
       for (let callback of this.redirectCallbacks) {
-        callback('info', this.namespace, content)
+        try {
+          await callback('info', this.namespace, content)
+        } catch (e) {
+          const errorLog = new Log(this.namespace)
+          await errorLog.error('Callback error in info:', e)
+        }
       }
       return
     }
     this._info(formatter, ...args)
     for (let callback of this.pipeCallbacks) {
       const content = format(formatter, ...args)
-      callback('info', this.namespace, content)
+      try {
+        await callback('info', this.namespace, content)
+      } catch (e) {
+        const errorLog = new Log(this.namespace)
+        await errorLog.error('Callback error in info pipe:', e)
+      }
     }
   }
 
@@ -131,18 +169,28 @@ export class Log {
    * 记录 warn 级别的日志消息。
    * 用于记录潜在问题或警告，这些问题不会立即影响应用程序运行，但需要注意。
    */
-  warn(formatter: unknown, ...args: unknown[]): void {
+  async warn(formatter: unknown, ...args: unknown[]): Promise<void> {
     if (this.redirectCallbacks.length > 0) {
       const content = format(formatter, ...args)
       for (let callback of this.redirectCallbacks) {
-        callback('warn', this.namespace, content)
+        try {
+          await callback('warn', this.namespace, content)
+        } catch (e) {
+          const errorLog = new Log(this.namespace)
+          await errorLog.error('Callback error in warn:', e)
+        }
       }
       return
     }
     this._warn(formatter, ...args)
     for (let callback of this.pipeCallbacks) {
       const content = format(formatter, ...args)
-      callback('warn', this.namespace, content)
+      try {
+        await callback('warn', this.namespace, content)
+      } catch (e) {
+        const errorLog = new Log(this.namespace)
+        await errorLog.error('Callback error in warn pipe:', e)
+      }
     }
   }
 
@@ -150,18 +198,28 @@ export class Log {
    * 记录 error 级别的日志消息。
    * 用于记录需要立即关注的错误或异常。
    */
-  error(formatter: unknown, ...args: unknown[]): void {
+  async error(formatter: unknown, ...args: unknown[]): Promise<void> {
     if (this.redirectCallbacks.length > 0) {
       const content = format(formatter, ...args)
       for (let callback of this.redirectCallbacks) {
-        callback('error', this.namespace, content)
+        try {
+          await callback('error', this.namespace, content)
+        } catch (e) {
+          const errorLog = new Log(this.namespace)
+          await errorLog.error('Callback error in error:', e)
+        }
       }
       return
     }
     this._error(formatter, ...args)
     for (let callback of this.pipeCallbacks) {
       const content = format(formatter, ...args)
-      callback('error', this.namespace, content)
+      try {
+        await callback('error', this.namespace, content)
+      } catch (e) {
+        const errorLog = new Log(this.namespace)
+        await errorLog.error('Callback error in error pipe:', e)
+      }
     }
   }
 
@@ -169,29 +227,38 @@ export class Log {
    * 根据指定的日志级别记录日志消息。
    * 这个方法允许你动态选择要使用的日志级别（`trace` < `debug` < `info` < `warn` < `error`）。
    */
-  log(level: 'trace' | 'debug' | 'info' | 'warn' | 'error', formatter: unknown, ...args: unknown[]): void {
+  async log(
+    level: 'trace' | 'debug' | 'info' | 'warn' | 'error',
+    formatter: unknown,
+    ...args: unknown[]
+  ): Promise<void> {
     if (this.redirectCallbacks.length > 0) {
       const content = format(formatter, ...args)
       for (let callback of this.redirectCallbacks) {
-        callback(level, this.namespace, content)
+        try {
+          await callback(level, this.namespace, content)
+        } catch (e) {
+          const errorLog = new Log(this.namespace)
+          await errorLog.error('Callback error in log:', e)
+        }
       }
       return
     }
     switch (level) {
       case 'trace':
-        this.trace(formatter, ...args)
+        await this.trace(formatter, ...args)
         break
       case 'debug':
-        this.debug(formatter, ...args)
+        await this.debug(formatter, ...args)
         break
       case 'info':
-        this.info(formatter, ...args)
+        await this.info(formatter, ...args)
         break
       case 'warn':
-        this.warn(formatter, ...args)
+        await this.warn(formatter, ...args)
         break
       case 'error':
-        this.error(formatter, ...args)
+        await this.error(formatter, ...args)
         break
     }
   }
