@@ -42,11 +42,11 @@ export class Log {
   /**
    * 扩展当前日志对象，创建一个新的命名空间。
    * 这对于在应用程序的不同部分或模块中使用独立日志非常有用。
-   * @param {string} name - 要扩展的新命名空间。
+   * @param {string} namespace - 要扩展的新命名空间。
    * @returns {Log} 返回一个具有扩展命名空间的新 Log 实例。
    */
-  extend(name: string): Log {
-    return new Log(`${this.namespace}:${name}`)
+  extend(namespace: string): Log {
+    return new Log(`${this.namespace}:${namespace}`)
   }
 
   /**
