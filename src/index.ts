@@ -7,16 +7,12 @@ import debug from 'debug'
  */
 export class Log {
   private debugObj: debug.Debugger
-  private redirectCallback?: (
-    level: 'trace' | 'debug' | 'info' | 'warn' | 'error',
-    content: string,
-    namespace: string,
-  ) => void
-  private pipeCallback?: (
-    level: 'trace' | 'debug' | 'info' | 'warn' | 'error',
-    content: string,
-    namespace: string,
-  ) => void
+  private redirectCallbacks: Array<
+    (level: 'trace' | 'debug' | 'info' | 'warn' | 'error', content: string, namespace: string) => void
+  > = []
+  private pipeCallbacks: Array<
+    (level: 'trace' | 'debug' | 'info' | 'warn' | 'error', content: string, namespace: string) => void
+  > = []
   private _info: debug.Debugger
   private _debug: debug.Debugger
   private _error: debug.Debugger
@@ -46,7 +42,10 @@ export class Log {
    * @returns {Log} 返回一个具有扩展命名空间的新 Log 实例。
    */
   extend(namespace: string): Log {
-    return new Log(`${this.namespace}:${namespace}`)
+    let log = new Log(`${this.namespace}:${namespace}`)
+    log.redirectCallbacks = [...this.redirectCallbacks]
+    log.pipeCallbacks = [...this.pipeCallbacks]
+    return log
   }
 
   /**
@@ -55,8 +54,9 @@ export class Log {
    */
   redirect(
     callback: (level: 'trace' | 'debug' | 'info' | 'warn' | 'error', namespace: string, content: string) => void,
-  ): void {
-    this.redirectCallback = callback
+  ): this {
+    this.redirectCallbacks.push(callback)
+    return this
   }
 
   /**
@@ -66,7 +66,7 @@ export class Log {
   pipe(
     callback: (level: 'trace' | 'debug' | 'info' | 'warn' | 'error', namespace: string, content: string) => void,
   ): this {
-    this.pipeCallback = callback
+    this.pipeCallbacks.push(callback)
     return this
   }
 
@@ -75,15 +75,17 @@ export class Log {
    * 用于记录详细的跟踪信息，如函数调用或特定的业务逻辑步骤。
    */
   trace(formatter: unknown, ...args: unknown[]): void {
-    if (this.redirectCallback) {
+    if (this.redirectCallbacks.length > 0) {
       const content = format(formatter, ...args)
-      this.redirectCallback('trace', this.namespace, content)
+      for (let callback of this.redirectCallbacks) {
+        callback('trace', this.namespace, content)
+      }
       return
     }
     this._trace(formatter, ...args)
-    if (this.pipeCallback) {
+    for (let callback of this.pipeCallbacks) {
       const content = format(formatter, ...args)
-      this.pipeCallback('trace', this.namespace, content)
+      callback('trace', this.namespace, content)
     }
   }
 
@@ -92,15 +94,17 @@ export class Log {
    * 用于开发过程中记录详细的调试信息。
    */
   debug(formatter: unknown, ...args: unknown[]): void {
-    if (this.redirectCallback) {
+    if (this.redirectCallbacks.length > 0) {
       const content = format(formatter, ...args)
-      this.redirectCallback('debug', this.namespace, content)
+      for (let callback of this.redirectCallbacks) {
+        callback('debug', this.namespace, content)
+      }
       return
     }
     this._debug(formatter, ...args)
-    if (this.pipeCallback) {
+    for (let callback of this.pipeCallbacks) {
       const content = format(formatter, ...args)
-      this.pipeCallback('debug', this.namespace, content)
+      callback('debug', this.namespace, content)
     }
   }
 
@@ -109,15 +113,17 @@ export class Log {
    * 用于记录应用程序的一般信息。
    */
   info(formatter: unknown, ...args: unknown[]): void {
-    if (this.redirectCallback) {
+    if (this.redirectCallbacks.length > 0) {
       const content = format(formatter, ...args)
-      this.redirectCallback('info', this.namespace, content)
+      for (let callback of this.redirectCallbacks) {
+        callback('info', this.namespace, content)
+      }
       return
     }
     this._info(formatter, ...args)
-    if (this.pipeCallback) {
+    for (let callback of this.pipeCallbacks) {
       const content = format(formatter, ...args)
-      this.pipeCallback('info', this.namespace, content)
+      callback('info', this.namespace, content)
     }
   }
 
@@ -126,15 +132,17 @@ export class Log {
    * 用于记录潜在问题或警告，这些问题不会立即影响应用程序运行，但需要注意。
    */
   warn(formatter: unknown, ...args: unknown[]): void {
-    if (this.redirectCallback) {
+    if (this.redirectCallbacks.length > 0) {
       const content = format(formatter, ...args)
-      this.redirectCallback('warn', this.namespace, content)
+      for (let callback of this.redirectCallbacks) {
+        callback('warn', this.namespace, content)
+      }
       return
     }
     this._warn(formatter, ...args)
-    if (this.pipeCallback) {
+    for (let callback of this.pipeCallbacks) {
       const content = format(formatter, ...args)
-      this.pipeCallback('warn', this.namespace, content)
+      callback('warn', this.namespace, content)
     }
   }
 
@@ -143,15 +151,17 @@ export class Log {
    * 用于记录需要立即关注的错误或异常。
    */
   error(formatter: unknown, ...args: unknown[]): void {
-    if (this.redirectCallback) {
+    if (this.redirectCallbacks.length > 0) {
       const content = format(formatter, ...args)
-      this.redirectCallback('error', this.namespace, content)
+      for (let callback of this.redirectCallbacks) {
+        callback('error', this.namespace, content)
+      }
       return
     }
     this._error(formatter, ...args)
-    if (this.pipeCallback) {
+    for (let callback of this.pipeCallbacks) {
       const content = format(formatter, ...args)
-      this.pipeCallback('error', this.namespace, content)
+      callback('error', this.namespace, content)
     }
   }
 
@@ -160,9 +170,11 @@ export class Log {
    * 这个方法允许你动态选择要使用的日志级别（`trace` < `debug` < `info` < `warn` < `error`）。
    */
   log(level: 'trace' | 'debug' | 'info' | 'warn' | 'error', formatter: unknown, ...args: unknown[]): void {
-    if (this.redirectCallback) {
+    if (this.redirectCallbacks.length > 0) {
       const content = format(formatter, ...args)
-      this.redirectCallback(level, this.namespace, content)
+      for (let callback of this.redirectCallbacks) {
+        callback(level, this.namespace, content)
+      }
       return
     }
     switch (level) {
