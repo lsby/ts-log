@@ -1,6 +1,10 @@
 {
   "name": "@lsby/ts-log",
   "version": "0.3.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lsby/ts-log.git"
+  },
   "type": "module",
   "exports": {
     "require": "./dist/cjs/index.cjs",
